@@ -42,7 +42,7 @@ def main_process(args):
     while not(isOver):
         #check
         isOver = listen(args.auto_dir,args.monomer_name,args.num_nodes,args.max_nodes,args.max_2,args.isTest)##argsの中身を取る
-        time.sleep(1)
+        time.sleep(0.1)
 
 def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体を引数に取るか中身をばらして取るかの違い
     maxnum_machine2 = max_2#int(num_nodes/2) ##多分俺のために空けていてくださったので2 3にする
@@ -65,7 +65,7 @@ def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体�
             E1=float(E_list1[0])##8分子に向けてep1,ep2作成　ep1:b ep2:a
             df_E_1.loc[idx, ['E1','status']] = [E1,'Done']
             df_E_1.to_csv(auto_csv_1,index=False)
-            time.sleep(1)
+            #time.sleep(1)
             break#2つ同時に計算終わったりしたらまずいので一個で切る
     
     
@@ -88,7 +88,7 @@ def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体�
             E2 = float(E_list2[0])  # Updated to E2
             df_E_2.loc[idx, ['E2', 'status']] = [E2, 'Done']
             df_E_2.to_csv(auto_csv_2, index=False)  # Updated to auto_csv_2
-            time.sleep(1)
+            #time.sleep(1)
             break  # Break after one iteration
 
     
@@ -165,7 +165,7 @@ def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体�
             df_E_1.at[index, 'status'] = 'InProgress'
             df_E_1.at[index, 'file_name'] = file_name
             df_E_1.to_csv(auto_csv_1, index=False)
-            time.sleep(0.1)#
+            #time.sleep(0.1)#
     
     if len_qw_2 > 0 and margin > 0:# 進行中ジョブのマシンタイプをカウント
         for index, row in df_qw_2.iterrows():
@@ -183,7 +183,7 @@ def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体�
             df_E_2.at[index, 'status'] = 'InProgress'
             df_E_2.at[index, 'file_name'] = file_name
             df_E_2.to_csv(auto_csv_2, index=False)
-            time.sleep(0.1)# データフレームをCSVに保存
+            #time.sleep(0.1)# データフレームをCSVに保存
     
     if len_qw_3 > 0 and margin > 0:# 進行中ジョブのマシンタイプをカウント
         for index, row in df_qw_3.iterrows():
@@ -201,7 +201,7 @@ def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体�
             df_E_3.at[index, 'status'] = 'InProgress'
             df_E_3.at[index, 'file_name'] = file_name
             df_E_3.to_csv(auto_csv_3, index=False)
-            time.sleep(0.1)# データフレームをCSVに保存
+            #time.sleep(0.1)# データフレームをCSVに保存
     
     dict_matrix = get_params_dict(auto_dir,num_nodes)##更新分を流す a1~z2まで取得
     if len(dict_matrix)!=0:#終わりがまだ見えないなら
@@ -234,12 +234,12 @@ def listen(auto_dir,monomer_name,num_nodes,max_nodes,max_2,isTest):##args自体�
                         file_name = exec_gjf(auto_dir, monomer_name, {**params_dict1}, machine_type, structure_type=1,isTest=isTest);len_queue +=1
                         df_newline_1 = pd.Series({**params_dict1,'E1':0.,'machine_type':machine_type,'status':'InProgress','file_name':file_name})
                         df_E_new_1=pd.concat([df_E_1,df_newline_1.to_frame().T],axis=0,ignore_index=True);df_E_new_1.to_csv(auto_csv_1,index=False)
-                        time.sleep(0.1)
+                        #time.sleep(0.1)
                     else:
                         file_name = exec_gjf(auto_dir, monomer_name, {**params_dict1}, machine_type, structure_type=1,isTest=True)
                         df_newline_1 = pd.Series({**params_dict1,'E1':0.,'machine_type':1,'status':'qw','file_name':file_name})
                         df_E_new_1=pd.concat([df_E_1,df_newline_1.to_frame().T],axis=0,ignore_index=True);df_E_new_1.to_csv(auto_csv_1,index=False)
-                        time.sleep(0.1)
+                        #time.sleep(0.1)
 
                 ## 2の実行　##
                 auto_csv_2 = os.path.join(auto_dir,'step1_2.csv');df_E_2 = pd.read_csv(auto_csv_2)
