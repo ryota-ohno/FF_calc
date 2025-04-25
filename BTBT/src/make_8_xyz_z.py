@@ -38,7 +38,6 @@ def get_xyzR_lines(xyza_array,file_description,machine_type):
     for x,y,z,atom in xyza_array:
         line = '{} {} {} {}\n'.format(atom,x,y,z)     
         lines.append(line)
-        atom_index += 1
     
     lines.append('\n')
     lines_connectivity=['1 2 1.5 3 1.5 7 1.5 \n', '2 4 1.5 9 1.0 \n', '3 5 1.5 21 1.0 \n', '4 6 1.5 24 1.0 \n', '5 6 1.5 22 1.0 \n', '6 23 1.0 \n', '7 8 1.5 10 1.0 \n', '8 9 1.0 12 1.5 \n', '9 \n', '10 11 1.0 \n', '11 12 1.5 13 1.5 \n', '12 15 1.5 \n',
