@@ -62,7 +62,7 @@ def listen(auto_dir,monomer_name,num_nodes,isTest):##args自体を引数に取�
         else:
             len_prg_1-=1
             E1=float(E_list1[0])##8分子に向けてep1,ep2作成　ep1:b ep2:a
-            df_E_1.loc[idx, ['E1','status']] = [E1,'NotYet']
+            df_E_1.loc[idx, ['E1','status']] = [E1,'Done']
             df_E_1.to_csv(auto_csv_1,index=False)
             #time.sleep(1)
             break#2つ同時に計算終わったりしたらまずいので一個で切る
@@ -84,7 +84,7 @@ def listen(auto_dir,monomer_name,num_nodes,isTest):##args自体を引数に取�
         else:
             len_prg_2 -= 1
             E2 = float(E_list2[0])  # Updated to E2
-            df_E_2.loc[idx, ['E2', 'status']] = [E2, 'NotYet']
+            df_E_2.loc[idx, ['E2', 'status']] = [E2, 'Done']
             df_E_2.to_csv(auto_csv_2, index=False)  # Updated to auto_csv_2
             #time.sleep(1)
             break  # Break after one iteration
@@ -106,7 +106,7 @@ def listen(auto_dir,monomer_name,num_nodes,isTest):##args自体を引数に取�
         else:
             len_prg_3 -= 1
             E3 = float(E_list3[0]);E4 = float(E_list3[1])  # Updated to E3
-            df_E_3.loc[idx, ['E3', 'E4', 'status']] = [E3, E4, 'NotYet']
+            df_E_3.loc[idx, ['E3', 'E4', 'status']] = [E3, E4, 'Done']
             df_E_3.to_csv(auto_csv_3, index=False)  # Updated to auto_csv_3
             break  # Break after one iteration
 
@@ -119,7 +119,7 @@ def listen(auto_dir,monomer_name,num_nodes,isTest):##args自体を引数に取�
         params_dict2_ = row[fixed_param_keys + opt_param_keys_2].to_dict()
         params_dict3_ = row[fixed_param_keys + opt_param_keys_1 + opt_param_keys_2].to_dict()
         s1=filter_df(df_E_1, params_dict1_);s2=filter_df(df_E_2, params_dict2_);s3=filter_df(df_E_3, params_dict3_)#['file_name']
-        s1=s1[s1['status']=='NotYet'];s2=s2[s2['status']=='NotYet'];s3=s3[s3['status']=='NotYet']
+        s1=s1[s1['status']=='Done'];s2=s2[s2['status']=='Done'];s3=s3[s3['status']=='Done']
     
         if (len(s1) == 0) or (len(s2) == 0) or (len(s3) == 0):
             continue
@@ -130,7 +130,7 @@ def listen(auto_dir,monomer_name,num_nodes,isTest):##args自体を引数に取�
             E4 = s3['E4'].values.tolist()[0]
             
             E=E1+E2+E3+E4
-            df_E.loc[idx, ['E','E1','E2','E3','E4','status']] = [E,E1,E2,E3,E4,'NotYet']
+            df_E.loc[idx, ['E','E1','E2','E3','E4','status']] = [E,E1,E2,E3,E4,'Done']
             df_E.to_csv(auto_csv,index=False)
             break#2つ同時に計算終わったりしたらまずいので一個で切る
     
@@ -180,8 +180,8 @@ def listen(auto_dir,monomer_name,num_nodes,isTest):##args自体を引数に取�
     
     init_params_csv=os.path.join(auto_dir, 'step1_init_params.csv')
     df_init_params = pd.read_csv(init_params_csv)
-    df_init_params_NotYet = filter_df(df_init_params,{'status':'NotYet'})
-    isOver = True if len(df_init_params_NotYet)==len(df_init_params) else False
+    df_init_params_done = filter_df(df_init_params,{'status':'Done'})
+    isOver = True if len(df_init_params_done)==len(df_init_params) else False
     return isOver
 
 def check_calc_status(auto_dir,params_dict):
@@ -192,7 +192,7 @@ def check_calc_status(auto_dir,params_dict):
     df_E_filtered = df_E_filtered.reset_index(drop=True)
     try:
         status = get_values_from_df(df_E_filtered,0,'status')
-        return status=='NotYet'
+        return status=='Done'
     except KeyError:
         return False
 
@@ -221,15 +221,15 @@ def get_params_dict(auto_dir, num_nodes):
         df_init_params = pd.read_csv(init_params_csv)
         init_params_dict = df_init_params.loc[index,fixed_param_keys+opt_param_keys_1+opt_param_keys_2].to_dict()
         fixed_params_dict = df_init_params.loc[index,fixed_param_keys].to_dict()
-        isNotYet, opt_params_matrix = get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict)
-        if isNotYet:
+        isDone, opt_params_matrix = get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict)
+        if isDone:
             opt_params_dict={'a':np.round(opt_params_matrix[0][0],1),
                             'b':np.round(opt_params_matrix[0][1],1),'z':np.round(opt_params_matrix[0][2],1)
                             }
             # df_init_paramsのstatusをupdate
-            df_init_params = update_value_in_df(df_init_params,index,'status','NotYet')
+            df_init_params = update_value_in_df(df_init_params,index,'status','Done')
             if np.max(df_init_params.index) < index+1:##もうこれ以上は新しい計算は進まない
-                status = 'NotYet'
+                status = 'Done'
             else:
                 status = get_values_from_df(df_init_params,index+1,'status')
             df_init_params.to_csv(init_params_csv,index=False)
@@ -266,7 +266,7 @@ def get_opt_params_dict(df_cur, init_params_dict,fixed_params_dict):
                             b = np.round(b,1);z = np.round(z,1)
                             df_val_xyz = df_val[(df_val['a']==a)&
                                                 (df_val['b']==b)&(df_val['z']==z)&
-                                                (df_val['status']=='NotYet')]
+                                                (df_val['status']=='Done')]
                             if len(df_val_xyz)==0:
                                 para_list.append([a,b,z])
                                 continue
